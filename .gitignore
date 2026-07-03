@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+database/university_finance.db
+*.db-journal
+*.db-shm
+*.db-wal
+.streamlit/secrets.toml
