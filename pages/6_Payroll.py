@@ -4,6 +4,7 @@ Payroll Management — Salary Register, Salary Slips, Department Summary, Trend
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.theme import ENTERPRISE_CSS, kpi_card, section_header, alert, cuap_header, CUAP_LOGO
 
 import sqlite3
 import pandas as pd
@@ -18,26 +19,7 @@ from database.db_init import DEFAULT_DB_PATH
 st.set_page_config(page_title="Payroll | CUAP Finance", page_icon="💼", layout="wide")
 
 # ── CSS ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<style>
-.metric-card {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
-    border-radius: 12px; padding: 20px; color: white;
-    text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.metric-value { font-size: 1.8rem; font-weight: 700; margin: 8px 0; }
-.metric-label { font-size: 0.85rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; }
-.metric-card.green  { background: linear-gradient(135deg, #1a6b3a 0%, #27a85f 100%); }
-.metric-card.orange { background: linear-gradient(135deg, #7a3a00 0%, #d4700a 100%); }
-.metric-card.red    { background: linear-gradient(135deg, #6b1a1a 0%, #c0392b 100%); }
-.metric-card.purple { background: linear-gradient(135deg, #3a1a6b 0%, #7d3ac1 100%); }
-.slip-box {
-    background: #0e1117; border: 1px solid #333;
-    border-radius: 8px; padding: 20px; font-family: monospace;
-    font-size: 0.85rem; line-height: 1.7;
-}
-</style>
-""", unsafe_allow_html=True)
+st.markdown(ENTERPRISE_CSS, unsafe_allow_html=True)
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 def fmt_inr(v):

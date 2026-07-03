@@ -2,10 +2,13 @@ import streamlit as st
 import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from utils.theme import ENTERPRISE_CSS, kpi_card, section_header, alert, cuap_header, CUAP_LOGO
 from utils.data_loader import load_all_data
 from utils.ai_agent import get_ai_response
 
 st.set_page_config(page_title="AI Finance Agent", page_icon="🤖", layout="wide")
+
+st.markdown(ENTERPRISE_CSS, unsafe_allow_html=True)
 
 st.title("🤖 AI Finance Agent")
 st.markdown("Ask any question about the university's financial data in plain English.")

@@ -3,9 +3,12 @@ import pandas as pd
 import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from utils.theme import ENTERPRISE_CSS, kpi_card, section_header, alert, cuap_header, CUAP_LOGO
 from utils.data_loader import load_all_data, fmt_inr
 
 st.set_page_config(page_title="Balance Sheet", page_icon="📊", layout="wide")
+
+st.markdown(ENTERPRISE_CSS, unsafe_allow_html=True)
 
 st.title("📊 Balance Sheet")
 st.markdown("**As at 31st March 2026**")

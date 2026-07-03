@@ -1,5 +1,6 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.theme import ENTERPRISE_CSS, kpi_card, section_header, alert, cuap_header, CUAP_LOGO
 import sqlite3
 import pandas as pd
 import plotly.express as px
@@ -10,17 +11,7 @@ from utils.data_loader import fmt_inr
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database", "university_finance.db")
 
 st.set_page_config(page_title="Budgeting", page_icon="📋", layout="wide")
-st.markdown("""
-<style>
-.metric-card{background:linear-gradient(135deg,#1e3a5f,#2d6a9f);border-radius:12px;padding:20px;color:white;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-.metric-value{font-size:1.8rem;font-weight:700;margin:8px 0}
-.metric-label{font-size:.85rem;opacity:.85;text-transform:uppercase;letter-spacing:1px}
-.metric-card.green{background:linear-gradient(135deg,#1a6b3a,#27a85f)}
-.metric-card.orange{background:linear-gradient(135deg,#7a3a00,#d4700a)}
-.metric-card.red{background:linear-gradient(135deg,#6b1a1a,#c0392b)}
-.metric-card.purple{background:linear-gradient(135deg,#3a1a6b,#7d3ac1)}
-</style>
-""", unsafe_allow_html=True)
+st.markdown(ENTERPRISE_CSS, unsafe_allow_html=True)
 
 st.title("📋 Budget vs Actual")
 st.markdown("**Financial Year 2025–26**")
