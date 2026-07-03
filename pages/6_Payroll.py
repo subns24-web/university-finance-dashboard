@@ -177,59 +177,211 @@ with tab2:
     if st.button("🖨️ Generate Slip", type="primary"):
         row = df_valid[df_valid["emp_id"] == sel_emp_id].iloc[0]
 
-        month_disp = selected_month.replace("-", " ")
+        from datetime import datetime
+
         pay_date = row["payment_date"]
         try:
-            from datetime import datetime
             pay_date = datetime.strptime(pay_date, "%Y-%m-%d").strftime("%d-%b-%Y")
         except Exception:
             pass
 
-        gross = row["gross_salary"]
-        net   = row["net_salary"]
-        basic = row["basic"]
-        hra   = row["hra"]
-        da    = row["da"]
-        ta    = row["ta"]
-        med   = row["medical_allowance"]
-        other_allow = row.get("other_allowance", 0) or 0
-        pf    = row["pf_deduction"]
-        pt    = row["pt"]
-        tds   = row["tds"]
-        total_ded_v = row["total_deductions"]
-        utr   = row["utr_number"]
-        acct  = str(row["bank_account"])
+        doj = row.get("date_of_joining", "") or ""
+        dob = row.get("date_of_birth", "") or ""
+        for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
+            try: doj = datetime.strptime(doj, fmt).strftime("%d.%m.%Y"); break
+            except: pass
+        for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
+            try: dob = datetime.strptime(dob, fmt).strftime("%d.%m.%Y"); break
+            except: pass
+
+        gross       = float(row["gross_salary"] or 0)
+        net         = float(row["net_salary"] or 0)
+        basic       = float(row["basic"] or 0)
+        hra         = float(row["hra"] or 0)
+        da          = float(row["da"] or 0)
+        ta          = float(row["ta"] or 0)
+        med         = float(row["medical_allowance"] or 0)
+        other_allow = float(row.get("other_allowance") or 0)
+        pf          = float(row["pf_deduction"] or 0)
+        pt          = float(row["pt"] or 0)
+        tds         = float(row["tds"] or 0)
+        total_ded_v = float(row["total_deductions"] or 0)
+        working_days = int(row.get("working_days") or 31)
+        acct = str(row["bank_account"] or "")
         acct_masked = acct[:2] + "X"*(len(acct)-4) + acct[-2:] if len(acct) > 4 else acct
 
+        # Amount in words
+        def num_to_words(n):
+            n = int(round(n))
+            ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+                    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen",
+                    "Seventeen","Eighteen","Nineteen"]
+            tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"]
+            def two_digit(n):
+                if n < 20: return ones[n]
+                return tens[n//10] + (" " + ones[n%10] if n%10 else "")
+            def three_digit(n):
+                if n >= 100:
+                    return ones[n//100] + " Hundred" + (" " + two_digit(n%100) if n%100 else "")
+                return two_digit(n)
+            if n == 0: return "Zero"
+            parts = []
+            if n >= 10000000:
+                parts.append(three_digit(n//10000000) + " Crore"); n %= 10000000
+            if n >= 100000:
+                parts.append(three_digit(n//100000) + " Lakh"); n %= 100000
+            if n >= 1000:
+                parts.append(three_digit(n//1000) + " Thousand"); n %= 1000
+            if n > 0:
+                parts.append(three_digit(n))
+            return " ".join(parts)
+
+        net_words = "Rupees " + num_to_words(int(net)) + " Only"
+
+        # Build rows for credits and debits
+        credits_rows = [
+            ("Basic Salary", f"₹ {basic:,.2f}"),
+            ("House Rent Allowance", f"₹ {hra:,.2f}"),
+            ("Dearness Allowance", f"₹ {da:,.2f}"),
+            ("Transport Allowance", f"₹ {ta:,.2f}"),
+            ("Medical Allowance", f"₹ {med:,.2f}"),
+        ]
+        if other_allow > 0:
+            credits_rows.append(("Other Allowance", f"₹ {other_allow:,.2f}"))
+
+        debits_rows = [
+            ("Professional Tax", f"₹ {pt:,.2f}"),
+            ("Tax Deducted at Source", f"₹ {tds:,.2f}"),
+            ("Provident Fund (Employee)", f"₹ {pf:,.2f}"),
+        ]
+
+        max_rows = max(len(credits_rows), len(debits_rows))
+        while len(credits_rows) < max_rows: credits_rows.append(("", ""))
+        while len(debits_rows)  < max_rows: debits_rows.append(("", ""))
+
+        table_rows = ""
+        for (cl, cv), (dl, dv) in zip(credits_rows, debits_rows):
+            table_rows += f"""
+            <tr>
+              <td style="padding:6px 10px">{cl}</td>
+              <td style="padding:6px 10px; text-align:right; border-right:1px solid #ddd">{cv}</td>
+              <td style="padding:6px 10px">{dl}</td>
+              <td style="padding:6px 10px; text-align:right">{dv}</td>
+            </tr>"""
+
         slip_html = f"""
-<div class="slip-box">
-<pre style="color:#e2e8f0; margin:0">
-╔══════════════════════════════════════════════════════════════════╗
-║          UNIVERSITY FINANCE HUB — SALARY SLIP                  ║
-║                     {month_disp.upper():^36}                ║
-╠══════════════════════════════════════════════════════════════════╣
-║  Employee  : {row['name']:<30}  Emp ID : {row['emp_id']:<8}║
-║  Designation: {row['designation']:<28}  Dept   : {row['department']:<8}║
-║  PAN       : {row['pan']:<30}  Bank   : {row['bank_name']:<8}║
-║  A/c No    : {acct_masked:<30}  IFSC   : {row['ifsc']:<8}║
-╠══════════════════════════════════════════════════════════════════╣
-║        EARNINGS                      DEDUCTIONS                 ║
-║  Basic Salary : ₹{basic:>10,.2f}     PF Deduction : ₹{pf:>10,.2f}  ║
-║  HRA          : ₹{hra:>10,.2f}     Prof. Tax    : ₹{pt:>10,.2f}  ║
-║  DA           : ₹{da:>10,.2f}     TDS          : ₹{tds:>10,.2f}  ║
-║  TA           : ₹{ta:>10,.2f}                                   ║
-║  Medical      : ₹{med:>10,.2f}     Total Ded    : ₹{total_ded_v:>10,.2f}  ║
-║  Other Allow  : ₹{other_allow:>10,.2f}                                   ║
-╠══════════════════════════════════════════════════════════════════╣
-║  GROSS SALARY : ₹{gross:>10,.2f}       NET PAY      : ₹{net:>10,.2f}  ║
-╠══════════════════════════════════════════════════════════════════╣
-║  Payment Mode : {row['payment_mode']:<12}   UTR No  : {utr:<20}║
-║  Payment Date : {pay_date:<49}║
-╚══════════════════════════════════════════════════════════════════╝
-</pre>
+<div style="background:white; color:#000; border:2px solid #333; border-radius:4px;
+            padding:0; font-family:Arial,sans-serif; font-size:13px; max-width:860px; margin:auto;">
+
+  <!-- Header -->
+  <div style="background:#fff; border-bottom:2px solid #333; padding:16px 20px; display:flex; align-items:center; gap:16px;">
+    <div style="width:70px; height:70px; border:2px solid #c0392b; border-radius:50%;
+                display:flex; align-items:center; justify-content:center; font-size:10px;
+                color:#c0392b; text-align:center; font-weight:bold; flex-shrink:0;">UNIV<br>LOGO</div>
+    <div style="text-align:center; flex:1;">
+      <div style="font-size:18px; font-weight:bold; color:#c0392b;">विश्वविद्यालय वित्त हब</div>
+      <div style="font-size:22px; font-weight:bold; color:#1a3a6b;">University Finance Hub</div>
+      <div style="font-size:11px; color:#555;">Central University Campus, Visakhapatnam</div>
+    </div>
+  </div>
+
+  <!-- Slip title -->
+  <div style="text-align:center; padding:8px; background:#f5f5f5; border-bottom:1px solid #ccc;">
+    <strong style="font-size:15px; text-decoration:underline;">Payslip for {selected_month.replace('-',"' ")}</strong>
+  </div>
+
+  <!-- Employee Details Grid -->
+  <table style="width:100%; border-collapse:collapse; border-bottom:1px solid #ccc;">
+    <tr>
+      <td style="padding:5px 10px; width:22%; color:#555;">Employee Number</td>
+      <td style="padding:5px 10px; width:28%; font-weight:bold;">{row['emp_id']}</td>
+      <td style="padding:5px 10px; width:22%; color:#555;">Employee Name:</td>
+      <td style="padding:5px 10px; width:28%; font-weight:bold;">{row['name']}</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="padding:5px 10px; color:#555;">Department:</td>
+      <td style="padding:5px 10px;">{row['department']}</td>
+      <td style="padding:5px 10px; color:#555;">No. of Working Days</td>
+      <td style="padding:5px 10px;">{working_days}</td>
+    </tr>
+    <tr>
+      <td style="padding:5px 10px; color:#555;">Designation:</td>
+      <td style="padding:5px 10px;">{row['designation']}</td>
+      <td style="padding:5px 10px; color:#555;">Employment Type:</td>
+      <td style="padding:5px 10px;">{row['employment_type']}</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="padding:5px 10px; color:#555;">PAN No:</td>
+      <td style="padding:5px 10px;">{row['pan']}</td>
+      <td style="padding:5px 10px; color:#555;">Account No:</td>
+      <td style="padding:5px 10px;">{acct_masked}</td>
+    </tr>
+    <tr>
+      <td style="padding:5px 10px; color:#555;">Date of Birth:</td>
+      <td style="padding:5px 10px;">{dob}</td>
+      <td style="padding:5px 10px; color:#555;">IFSC Code:</td>
+      <td style="padding:5px 10px;">{row['ifsc']}</td>
+    </tr>
+    <tr style="background:#fafafa;">
+      <td style="padding:5px 10px; color:#555;">Date of Joining:</td>
+      <td style="padding:5px 10px;">{doj}</td>
+      <td style="padding:5px 10px; color:#555;">Bank Name:</td>
+      <td style="padding:5px 10px;">{row['bank_name']}</td>
+    </tr>
+    <tr>
+      <td style="padding:5px 10px; color:#555;">Payment Mode:</td>
+      <td style="padding:5px 10px;">{row['payment_mode']}</td>
+      <td style="padding:5px 10px; color:#555;">UTR / Ref No:</td>
+      <td style="padding:5px 10px;">{row['utr_number']}</td>
+    </tr>
+  </table>
+
+  <!-- Credits / Debits -->
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="background:#1a3a6b; color:white;">
+        <th colspan="2" style="padding:8px 10px; text-align:center; border-right:1px solid #aaa;">CREDITS</th>
+        <th colspan="2" style="padding:8px 10px; text-align:center;">DEBITS</th>
+      </tr>
+    </thead>
+    <tbody style="background:#fff;">
+      {table_rows}
+      <tr style="border-top:1px solid #ccc; font-weight:bold; background:#f0f0f0;">
+        <td style="padding:8px 10px;">Gross Total</td>
+        <td style="padding:8px 10px; text-align:right; border-right:1px solid #ddd;">₹ {gross:,.2f}</td>
+        <td style="padding:8px 10px;">Total Deductions</td>
+        <td style="padding:8px 10px; text-align:right;">₹ {total_ded_v:,.2f}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Net Salary -->
+  <table style="width:100%; border-collapse:collapse; border-top:2px solid #333;">
+    <tr style="background:#e8f4e8;">
+      <td colspan="3" style="padding:10px 10px; font-weight:bold; font-size:14px; color:#1a6b3a; text-align:center;">
+        Net Salary Remitted to Account
+      </td>
+      <td style="padding:10px 10px; font-weight:bold; font-size:14px; color:#1a6b3a; text-align:right;">
+        ₹ {net:,.2f}
+      </td>
+    </tr>
+  </table>
+
+  <!-- Amount in Words -->
+  <div style="padding:10px 14px; border-top:1px solid #ccc; background:#fff;">
+    <span style="color:#555;">Amount in Words : </span>
+    <span style="text-decoration:underline; font-weight:bold;">{net_words}</span>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:8px 14px; background:#f9f9f9; border-top:1px solid #ccc;
+              font-size:11px; color:#777; font-style:italic; text-align:center;">
+    ' This is computer generated, hence no signature is required '
+  </div>
 </div>
 """
         st.markdown(slip_html, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
         if st.button("✉️ Mark as Sent", key=f"mark_sent_{sel_emp_id}"):
             conn = sqlite3.connect(DEFAULT_DB_PATH)
