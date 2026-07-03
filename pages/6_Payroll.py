@@ -15,7 +15,7 @@ import streamlit.components.v1 as components
 from database.db_init import DEFAULT_DB_PATH
 
 # ── Page config ────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Payroll | University Finance", page_icon="💼", layout="wide")
+st.set_page_config(page_title="Payroll | CUAP Finance", page_icon="💼", layout="wide")
 
 # ── CSS ────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -279,13 +279,12 @@ with tab2:
 
   <!-- Header -->
   <div style="background:#fff; border-bottom:2px solid #333; padding:16px 20px; display:flex; align-items:center; gap:16px;">
-    <div style="width:70px; height:70px; border:2px solid #c0392b; border-radius:50%;
-                display:flex; align-items:center; justify-content:center; font-size:10px;
-                color:#c0392b; text-align:center; font-weight:bold; flex-shrink:0;">UNIV<br>LOGO</div>
+    <img src="https://cuap.ac.in/wp-content/uploads/2025/05/cu_logo_mod.png"
+         style="width:70px; height:70px; object-fit:contain; flex-shrink:0;">
     <div style="text-align:center; flex:1;">
-      <div style="font-size:18px; font-weight:bold; color:#c0392b;">विश्वविद्यालय वित्त हब</div>
-      <div style="font-size:22px; font-weight:bold; color:#1a3a6b;">University Finance Hub</div>
-      <div style="font-size:11px; color:#555;">Central University Campus, Visakhapatnam</div>
+      <div style="font-size:20px; font-weight:bold; color:#1a3a6b;">Central University of Andhra Pradesh</div>
+      <div style="font-size:13px; color:#444;">'Jnana Seema', Ananthapuramu, Andhra Pradesh – 515701</div>
+      <div style="font-size:11px; color:#888;">Established by an Act of Parliament | www.cuap.ac.in</div>
     </div>
   </div>
 

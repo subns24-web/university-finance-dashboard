@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from utils.data_loader import load_all_data, get_kpis, get_monthly_collection_trend, fmt_inr
 
 st.set_page_config(
-    page_title="University Finance Hub",
+    page_title="CUAP Finance & Accounts",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -35,8 +35,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Sidebar ────────────────────────────────────────────────────────────────
+CUAP_LOGO = "https://cuap.ac.in/wp-content/uploads/2025/05/cu_logo_mod.png"
+CUAP_NAME = "Central University of Andhra Pradesh"
+CUAP_SHORT = "CUAP"
+CUAP_ADDR = "'Jnana Seema', Ananthapuramu, AP – 515701"
+
 with st.sidebar:
-    st.markdown("## 🎓 University Finance Hub")
+    st.image(CUAP_LOGO, width=80)
+    st.markdown(f"### {CUAP_NAME}")
+    st.markdown(f"<small style='color:#aaa'>{CUAP_ADDR}</small>", unsafe_allow_html=True)
     st.markdown("---")
 
     # ── File Upload ──────────────────────────────────────────────────────
@@ -89,7 +96,9 @@ with st.sidebar:
     st.markdown("- 💰 Fee Collection\n- ⚠️ Outstanding Fees\n- 📊 Balance Sheet\n- 📈 Income & Expenditure\n- 🤖 AI Agent")
     st.markdown("---")
     st.markdown(f"**Data as of:** June 2026")
-    st.markdown("**Academic Year:** 2025–2026")
+    st.markdown("**Academic Year:** 2025–26")
+    st.markdown("---")
+    st.markdown("<small>VC: Prof. S A Kori<br>cuap.ac.in</small>", unsafe_allow_html=True)
 
 # ── Load data ──────────────────────────────────────────────────────────────
 with st.spinner("Loading financial data..."):
@@ -98,8 +107,13 @@ with st.spinner("Loading financial data..."):
 kpis = get_kpis(data)
 
 # ── Title ──────────────────────────────────────────────────────────────────
-st.title("🎓 University Finance Dashboard")
-st.markdown("### Financial Overview — Academic Year 2025–2026")
+col_logo, col_title = st.columns([1, 8])
+with col_logo:
+    st.image(CUAP_LOGO, width=80)
+with col_title:
+    st.title("Central University of Andhra Pradesh")
+    st.markdown("#### Finance & Accounts Dashboard — Academic Year 2025–26")
+st.markdown("**VC:** Prof. S A Kori &nbsp;|&nbsp; **Campus:** 'Jnana Seema', Ananthapuramu, AP – 515701 &nbsp;|&nbsp; **Est.:** 2018")
 st.markdown("---")
 
 # ── KPI Cards ─────────────────────────────────────────────────────────────
