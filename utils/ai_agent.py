@@ -3,9 +3,11 @@ import anthropic
 import pandas as pd
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from the project root regardless of working directory
+_env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+load_dotenv(_env_path, override=True)
 
-MODEL = "claude-sonnet-4-6"
+MODEL = "claude-haiku-4-5-20251001"
 
 
 def build_data_context(data: dict) -> str:
@@ -91,8 +93,8 @@ def get_relevant_data_for_query(query: str, data: dict) -> str:
     students = data["students"]
 
     # Student-specific or course-specific outstanding queries
-    for course in outstanding["Course"].unique():
-        if course and course.lower() in query_lower:
+    for course in outstanding["Course"].dropna().unique():
+        if course and str(course).lower() in query_lower:
             df = outstanding[outstanding["Course"] == course]
             parts.append(f"Outstanding fees for {course} students:\n{df[['Student_Name','Branch','Semester','Balance_Due','Days_Overdue','Overdue_Category']].to_string(index=False)}")
             break
@@ -174,7 +176,7 @@ def get_ai_response(messages: list, data: dict) -> str:
 
     response = client.messages.create(
         model=MODEL,
-        max_tokens=2048,
+        max_tokens=1024,
         system=system_prompt,
         messages=api_messages,
     )
