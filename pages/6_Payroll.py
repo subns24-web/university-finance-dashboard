@@ -10,6 +10,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.components.v1 as components
 
 from database.db_init import DEFAULT_DB_PATH
 
@@ -269,7 +270,10 @@ with tab2:
               <td style="padding:6px 10px; text-align:right">{dv}</td>
             </tr>"""
 
-        slip_html = f"""
+        slip_html = f"""<!DOCTYPE html><html><head>
+<meta charset="utf-8">
+<style>body{{margin:0;padding:8px;background:#f0f0f0;font-family:Arial,sans-serif}}</style>
+</head><body>
 <div style="background:white; color:#000; border:2px solid #333; border-radius:4px;
             padding:0; font-family:Arial,sans-serif; font-size:13px; max-width:860px; margin:auto;">
 
@@ -379,8 +383,9 @@ with tab2:
     ' This is computer generated, hence no signature is required '
   </div>
 </div>
+</body></html>
 """
-        st.markdown(slip_html, unsafe_allow_html=True)
+        components.html(slip_html, height=720, scrolling=True)
         st.markdown("<br>", unsafe_allow_html=True)
 
         if st.button("✉️ Mark as Sent", key=f"mark_sent_{sel_emp_id}"):
