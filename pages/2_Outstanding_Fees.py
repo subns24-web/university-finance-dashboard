@@ -87,7 +87,7 @@ display_df["Due_Date"] = display_df["Due_Date"].dt.strftime("%d-%b-%Y")
 display_df["Last_Payment_Date"] = display_df["Last_Payment_Date"].dt.strftime("%d-%b-%Y")
 
 def color_rows(row):
-    days = row["Days_Overdue"]
+    days = row.get("Days Overdue", row.get("Days_Overdue", 0))
     if days > 90:
         color = "background-color: #4a1010; color: #ff6b6b"
     elif days > 60:
